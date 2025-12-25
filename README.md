@@ -10,7 +10,7 @@ server-side services.
 - Simple registry for registering custom commands
 
 ## Requirements
-- Java 8+ (compatible with Maven)
+- Java 17+ (compatible with Maven)
 
 ## Build
 ```bash
