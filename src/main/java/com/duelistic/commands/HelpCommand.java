@@ -14,9 +14,9 @@ public class HelpCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        System.out.println("Available commands:");
+        com.duelistic.ui.ConsoleUi.section("Available commands");
         for (Command command : registry.list()) {
-            System.out.println("- " + command.getName());
+            com.duelistic.ui.ConsoleUi.item(command.getName());
         }
     }
 }
