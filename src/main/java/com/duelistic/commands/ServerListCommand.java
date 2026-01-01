@@ -7,18 +7,30 @@ import com.duelistic.system.ServerStatus;
 import com.duelistic.system.ServerStatusService;
 import com.duelistic.ui.ConsoleUi;
 
+/**
+ * Lists current temporary server statuses.
+ */
 public class ServerListCommand implements Command {
     private final ServerStatusService statusService;
 
+    /**
+     * Creates the server list command with status service.
+     */
     public ServerListCommand(ServerStatusService statusService) {
         this.statusService = statusService;
     }
 
+    /**
+     * Returns the CLI command name.
+     */
     @Override
     public String getName() {
         return "servers";
     }
 
+    /**
+     * Displays server status information to the console.
+     */
     @Override
     public void execute(String[] args) {
         try {

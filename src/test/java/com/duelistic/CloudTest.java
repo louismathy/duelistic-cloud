@@ -5,13 +5,13 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple App.
+ * Smoke test placeholder for the cloud module.
  */
 public class CloudTest
     extends TestCase
 {
     /**
-     * Create the test case
+     * Creates the test case.
      *
      * @param testName name of the test case
      */
@@ -21,6 +21,8 @@ public class CloudTest
     }
 
     /**
+     * Builds the test suite for this class.
+     *
      * @return the suite of tests being tested
      */
     public static Test suite()
@@ -29,7 +31,7 @@ public class CloudTest
     }
 
     /**
-     * Rigourous Test :-)
+     * Verifies the test harness runs.
      */
     public void testApp()
     {

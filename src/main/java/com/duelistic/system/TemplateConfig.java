@@ -11,6 +11,9 @@ import java.util.Map;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+/**
+ * Represents configuration for a server template stored in YAML.
+ */
 public class TemplateConfig {
     private final String templateName;
     private final int maxRamMb;
@@ -18,6 +21,9 @@ public class TemplateConfig {
     private final int serverMin;
     private final int serverMax;
 
+    /**
+     * Creates a template configuration.
+     */
     public TemplateConfig(String templateName, int maxRamMb, int maxPlayers, int serverMin, int serverMax) {
         this.templateName = templateName;
         this.maxRamMb = maxRamMb;
@@ -26,26 +32,44 @@ public class TemplateConfig {
         this.serverMax = serverMax;
     }
 
+    /**
+     * Returns the template name.
+     */
     public String getTemplateName() {
         return templateName;
     }
 
+    /**
+     * Returns the max RAM in MB.
+     */
     public int getMaxRamMb() {
         return maxRamMb;
     }
 
+    /**
+     * Returns the max player capacity.
+     */
     public int getMaxPlayers() {
         return maxPlayers;
     }
 
+    /**
+     * Returns the minimum number of servers to keep running.
+     */
     public int getServerMin() {
         return serverMin;
     }
 
+    /**
+     * Returns the maximum number of servers to allow.
+     */
     public int getServerMax() {
         return serverMax;
     }
 
+    /**
+     * Writes the config to a YAML file on disk.
+     */
     public void writeTo(Path configFile) throws IOException {
         // Persist template settings in YAML format.
         Files.createDirectories(configFile.getParent());
@@ -57,6 +81,9 @@ public class TemplateConfig {
         }
     }
 
+    /**
+     * Loads template config from a YAML file.
+     */
     public static TemplateConfig loadFrom(Path configFile) throws IOException {
         // Load template config from YAML and validate required keys.
         if (!Files.exists(configFile)) {
@@ -75,6 +102,9 @@ public class TemplateConfig {
         return new TemplateConfig(templateName, maxRamMb, maxPlayers, serverMin, serverMax);
     }
 
+    /**
+     * Serializes the config into a YAML-friendly map.
+     */
     private Map<String, Object> toMap() {
         // Serialize only non-empty template name.
         Map<String, Object> data = new LinkedHashMap<>();
@@ -88,6 +118,9 @@ public class TemplateConfig {
         return data;
     }
 
+    /**
+     * Reads a required integer field from the YAML map.
+     */
     private static int readInt(Map<String, Object> data, String key) throws IOException {
         Object value = data.get(key);
         if (value == null) {
@@ -103,6 +136,9 @@ public class TemplateConfig {
         }
     }
 
+    /**
+     * Reads an optional string field from the YAML map.
+     */
     private static String readString(Map<String, Object> data, String key) {
         // Strings are optional and trimmed.
         Object value = data.get(key);

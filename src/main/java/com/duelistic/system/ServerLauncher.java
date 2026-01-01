@@ -10,20 +10,33 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.duelistic.Cloud;
 import com.duelistic.ui.ConsoleUi;
+import com.duelistic.util.ResourceUtil;
 
+/**
+ * Starts temporary server instances from templates and assigns ports.
+ */
 public class ServerLauncher {
     private static final int BASE_PORT = 25565;
     private final CloudDirectories directories;
     private final ServerProcessManager processManager;
     private final ServerPlayerRegistry playerRegistry;
 
+    /**
+     * Creates a launcher that can start template servers.
+     */
     public ServerLauncher(CloudDirectories directories, ServerProcessManager processManager, ServerPlayerRegistry playerRegistry) {
         this.directories = directories;
         this.processManager = processManager;
         this.playerRegistry = playerRegistry;
     }
 
+    /**
+     * Starts the minimum number of servers for each template.
+     *
+     * @return number of servers created.
+     */
     public int startAll() throws IOException {
         // Reset tmp servers and recreate from templates.
         directories.deleteTmp();
@@ -73,6 +86,11 @@ public class ServerLauncher {
         return created;
     }
 
+    /**
+     * Starts one additional server instance for a specific template.
+     *
+     * @return the new server name.
+     */
     public String startTemplateServer(String templateName) throws IOException {
         if (!directories.templateExists(templateName)) {
             throw new IOException("Template not found: " + templateName);
@@ -81,6 +99,16 @@ public class ServerLauncher {
         if (config.getMaxRamMb() <= 0) {
             throw new IOException("Invalid maxRamMb for template: " + templateName);
         }
+        if (Cloud.getInstance().getCloudConfig().getOnlyStartServerIfFreeRam()) {
+            long freeRam = Cloud.getInstance().getCloudConfig().isBasedOnOverallSystemMemory()
+                    ? ResourceUtil.getFreeMemory()
+                    : Cloud.getInstance().getVirtualResourceUtil().getFreeRam();
+
+            if (freeRam < config.getMaxRamMb()) {
+                return null;
+            }
+        }
+
         // Determine next index and pick a free port.
         List<String> existingServers = directories.listTmpServers();
         Set<Integer> usedPorts = new HashSet<>();
@@ -117,6 +145,9 @@ public class ServerLauncher {
         return serverName;
     }
 
+    /**
+     * Finds the next free TCP port, skipping any already used ports.
+     */
     private int findNextFreePort(int startPort, Set<Integer> usedPorts) throws IOException {
         // Scan for a free TCP port, avoiding ones already assigned.
         int port = Math.max(1, startPort);
@@ -129,6 +160,9 @@ public class ServerLauncher {
         throw new IOException("No free ports available.");
     }
 
+    /**
+     * Checks whether a port can be bound locally.
+     */
     private boolean isPortFree(int port) {
         try (ServerSocket socket = new ServerSocket(port)) {
             socket.setReuseAddress(true);
@@ -138,6 +172,9 @@ public class ServerLauncher {
         }
     }
 
+    /**
+     * Updates server.properties with the assigned port values.
+     */
     private void updatePorts(Path serverDir, int port) throws IOException {
         Path propertiesFile = serverDir.resolve("server.properties");
         if (!Files.exists(propertiesFile)) {
@@ -169,6 +206,9 @@ public class ServerLauncher {
         Files.write(propertiesFile, updated, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Finds the server jar file inside a template/server directory.
+     */
     private Path findServerJar(Path serverDir) throws IOException {
         // Pick the first jar in the directory as the server jar.
         List<Path> jars = new ArrayList<>();
@@ -185,6 +225,9 @@ public class ServerLauncher {
         return jars.get(0);
     }
 
+    /**
+     * Reads the assigned server port from server.properties.
+     */
     private int readServerPort(String serverName) {
         // Read server-port from server.properties for existing servers.
         Path propertiesFile = directories.getTmpServerDir(serverName).resolve("server.properties");
@@ -208,6 +251,9 @@ public class ServerLauncher {
         }
     }
 
+    /**
+     * Parses the numeric suffix from a server name.
+     */
     private int parseServerIndex(String templateName, String serverName) {
         // Extract numeric suffix from "<template>-<index>".
         String prefix = templateName + "-";

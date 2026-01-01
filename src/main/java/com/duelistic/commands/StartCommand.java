@@ -5,18 +5,30 @@ import java.io.IOException;
 import com.duelistic.system.ServerLauncher;
 import com.duelistic.ui.ConsoleUi;
 
+/**
+ * Starts all template servers from the CLI.
+ */
 public class StartCommand implements Command {
     private final ServerLauncher launcher;
 
+    /**
+     * Creates the start command with a server launcher.
+     */
     public StartCommand(ServerLauncher launcher) {
         this.launcher = launcher;
     }
 
+    /**
+     * Returns the CLI command name.
+     */
     @Override
     public String getName() {
         return "start";
     }
 
+    /**
+     * Starts all configured template servers.
+     */
     @Override
     public void execute(String[] args) {
         try {

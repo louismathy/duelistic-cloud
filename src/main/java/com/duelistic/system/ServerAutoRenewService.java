@@ -12,6 +12,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.duelistic.ui.ConsoleUi;
 
+/**
+ * Periodically checks servers for crashes and scales templates as needed.
+ */
 public class ServerAutoRenewService {
     private final CloudDirectories directories;
     private final ServerStatusService statusService;
@@ -22,6 +25,9 @@ public class ServerAutoRenewService {
     private final ScheduledExecutorService executor;
     private final long intervalMs;
 
+    /**
+     * Creates a new auto-renew service with the provided dependencies.
+     */
     public ServerAutoRenewService(CloudDirectories directories,
                                   ServerStatusService statusService,
                                   ServerLauncher launcher,
@@ -37,15 +43,24 @@ public class ServerAutoRenewService {
         this.executor = Executors.newSingleThreadScheduledExecutor();
     }
 
+    /**
+     * Starts the periodic health and scaling checks.
+     */
     public void start() {
         // Periodically check status to restart crashed servers and scale up.
         executor.scheduleAtFixedRate(this::checkServers, intervalMs, intervalMs, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Stops the scheduled check task immediately.
+     */
     public void stop() {
         executor.shutdownNow();
     }
 
+    /**
+     * Runs a single cycle of crash detection and scaling.
+     */
     private void checkServers() {
         try {
             List<ServerStatus> statuses = statusService.listStatuses();
@@ -70,10 +85,13 @@ public class ServerAutoRenewService {
         }
     }
 
+    /**
+     * Handles a server that was online and now appears offline.
+     */
     private void handleCrash(ServerStatus status) {
         String serverName = status.getName();
         String template = status.getTemplate();
-        ConsoleUi.warn("Detected crash for " + serverName + " (template " + template + ").");
+        ConsoleUi.warn("Detected shutdown / crash for " + serverName + " (template " + template + ").");
         try {
             processManager.stopServer(serverName);
             directories.deleteTmpServer(serverName);
@@ -89,6 +107,9 @@ public class ServerAutoRenewService {
         }
     }
 
+    /**
+     * Counts tmp servers that belong to a template.
+     */
     private int countServersForTemplate(String template) throws IOException {
         // Count tmp servers that belong to a template.
         int count = 0;
@@ -100,6 +121,9 @@ public class ServerAutoRenewService {
         return count;
     }
 
+    /**
+     * Attempts to resolve a template name for a server directory.
+     */
     private String readTemplateName(String serverName) {
         try {
             TemplateConfig config = TemplateConfig.loadFrom(directories.getTmpServerDir(serverName).resolve("template.yml"));
@@ -117,6 +141,9 @@ public class ServerAutoRenewService {
         return "unknown";
     }
 
+    /**
+     * Starts new servers if all instances of a template are full.
+     */
     private void checkScaleUp(List<ServerStatus> statuses) throws IOException {
         // If all servers of a template are full, start another instance (if allowed).
         Map<String, List<ServerStatus>> byTemplate = new HashMap<>();

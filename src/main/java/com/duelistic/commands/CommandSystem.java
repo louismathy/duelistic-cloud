@@ -5,16 +5,25 @@ import java.util.Scanner;
 
 import com.duelistic.ui.ConsoleUi;
 
+/**
+ * Reads commands from stdin and dispatches them to handlers.
+ */
 public class CommandSystem {
     private final Scanner scanner;
     private final CommandRegistry registry;
     private boolean running;
 
+    /**
+     * Creates a command system bound to a scanner and registry.
+     */
     public CommandSystem(Scanner scanner, CommandRegistry registry) {
         this.scanner = scanner;
         this.registry = registry;
     }
 
+    /**
+     * Starts the command loop until stopped.
+     */
     public void start() {
         running = true;
         ConsoleUi.info("CLI ready. Enter a command.");
@@ -35,6 +44,9 @@ public class CommandSystem {
         }
     }
 
+    /**
+     * Stops the command loop after the current iteration.
+     */
     public void stop() {
         running = false;
     }

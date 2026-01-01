@@ -7,20 +7,32 @@ import com.duelistic.system.CloudDirectories;
 import com.duelistic.system.TemplateConfig;
 import com.duelistic.ui.ConsoleUi;
 
+/**
+ * Performs initial setup by creating a lobby template.
+ */
 public class SetupCommand implements Command {
     private final CloudDirectories directories;
     private final TemplateConfigPrompter prompter;
 
+    /**
+     * Creates the setup command with directory helper and input scanner.
+     */
     public SetupCommand(CloudDirectories directories, Scanner scanner) {
         this.directories = directories;
         this.prompter = new TemplateConfigPrompter(scanner);
     }
 
+    /**
+     * Returns the CLI command name.
+     */
     @Override
     public String getName() {
         return "setup";
     }
 
+    /**
+     * Runs the interactive setup flow.
+     */
     @Override
     public void execute(String[] args) {
         try {

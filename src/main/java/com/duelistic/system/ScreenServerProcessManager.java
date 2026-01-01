@@ -11,7 +11,13 @@ import java.util.List;
 
 import com.duelistic.ui.ConsoleUi;
 
+/**
+ * Manages server processes using GNU screen sessions.
+ */
 public class ScreenServerProcessManager implements ServerProcessManager {
+    /**
+     * Starts a server in a detached screen session.
+     */
     @Override
     public void startServer(String name, List<String> command, Path workingDir) {
         // Start the server in a detached screen session.
@@ -24,6 +30,9 @@ public class ScreenServerProcessManager implements ServerProcessManager {
         runCommand(fullCommand, workingDir, false);
     }
 
+    /**
+     * Stops the screen session for the named server.
+     */
     @Override
     public void stopServer(String name) {
         // Stop the screen session by name.
@@ -36,6 +45,9 @@ public class ScreenServerProcessManager implements ServerProcessManager {
         runCommand(fullCommand, null, false);
     }
 
+    /**
+     * Lists active screen session names that represent servers.
+     */
     @Override
     public List<String> listServers() {
         // Parse "screen -ls" output into session names.
@@ -65,6 +77,9 @@ public class ScreenServerProcessManager implements ServerProcessManager {
         return Collections.unmodifiableList(servers);
     }
 
+    /**
+     * Attaches to a server screen session for interactive control.
+     */
     @Override
     public void attachServer(String name) {
         // Attach to a running screen session.
@@ -75,6 +90,9 @@ public class ScreenServerProcessManager implements ServerProcessManager {
         runCommand(attachCommand, null, false);
     }
 
+    /**
+     * Executes a screen command and optionally captures stdout lines.
+     */
     private List<String> runCommand(List<String> command, Path workingDir, boolean captureOutput) {
         // Helper to run shell commands, optionally capturing stdout.
         ProcessBuilder builder = new ProcessBuilder(command);
@@ -106,6 +124,9 @@ public class ScreenServerProcessManager implements ServerProcessManager {
         return Collections.emptyList();
     }
 
+    /**
+     * Reads all bytes from an input stream.
+     */
     private byte[] readAllBytes(InputStream input) throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];

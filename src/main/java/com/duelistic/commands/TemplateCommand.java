@@ -8,20 +8,32 @@ import com.duelistic.system.CloudDirectories;
 import com.duelistic.system.TemplateConfig;
 import com.duelistic.ui.ConsoleUi;
 
+/**
+ * Manages server templates via CLI subcommands.
+ */
 public class TemplateCommand implements Command {
     private final CloudDirectories directories;
     private final TemplateConfigPrompter prompter;
 
+    /**
+     * Creates the template command with directory helper and input scanner.
+     */
     public TemplateCommand(CloudDirectories directories, Scanner scanner) {
         this.directories = directories;
         this.prompter = new TemplateConfigPrompter(scanner);
     }
 
+    /**
+     * Returns the CLI command name.
+     */
     @Override
     public String getName() {
         return "template";
     }
 
+    /**
+     * Dispatches template subcommands (add/remove/list).
+     */
     @Override
     public void execute(String[] args) {
         if (args.length == 0) {
@@ -46,6 +58,9 @@ public class TemplateCommand implements Command {
         printUsage();
     }
 
+    /**
+     * Handles the "template add" flow.
+     */
     private void handleAdd(String[] args) {
         if (args.length < 2) {
             ConsoleUi.warn("Missing template name.");
@@ -71,6 +86,9 @@ public class TemplateCommand implements Command {
         }
     }
 
+    /**
+     * Handles the "template remove" flow.
+     */
     private void handleRemove(String[] args) {
         if (args.length < 2) {
             ConsoleUi.warn("Missing template name.");
@@ -94,6 +112,9 @@ public class TemplateCommand implements Command {
         }
     }
 
+    /**
+     * Lists available templates.
+     */
     private void handleList() {
         try {
             List<String> templates = directories.listTemplates();
@@ -110,6 +131,9 @@ public class TemplateCommand implements Command {
         }
     }
 
+    /**
+     * Prints CLI usage for template commands.
+     */
     private void printUsage() {
         ConsoleUi.section("Usage");
         ConsoleUi.item("template add <name>");
