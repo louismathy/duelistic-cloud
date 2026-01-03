@@ -4,6 +4,7 @@ package com.duelistic;
 import java.util.Scanner;
 
 import com.duelistic.commands.*;
+import com.duelistic.features.party.PartyManager;
 import com.duelistic.http.CloudHttpServer;
 import com.duelistic.system.CloudConfig;
 import com.duelistic.system.CloudDirectories;
@@ -48,6 +49,7 @@ public class Cloud
     private ServerSqlSyncService serverSqlSyncService;
     private VirtualResourceUtil virtualResourceUtil;
     private CloudHttpServer httpServer;
+    private PartyManager partyManager;
     /**
      * Bootstraps the cloud runtime and starts all recurring services.
      *
@@ -59,11 +61,11 @@ public class Cloud
         ConsoleUi.info("Starting up...");
 
         instance = new Cloud();
-        // Core service wiring.
         instance.keyScanner = new Scanner(System.in);
         instance.cloudDirectories = new CloudDirectories();
         instance.processManager = new ScreenServerProcessManager();
         instance.playerRegistry = new ServerPlayerRegistry();
+        instance.partyManager = new PartyManager();
         instance.serverLauncher = new ServerLauncher(instance.cloudDirectories, instance.processManager, instance.playerRegistry);
         instance.serverShutdown = new ServerShutdown(instance.cloudDirectories, instance.processManager);
         instance.statusService = new ServerStatusService(instance.cloudDirectories, instance.playerRegistry);
@@ -102,10 +104,10 @@ public class Cloud
             instance.httpServer = new CloudHttpServer(instance.statusService,
                 instance.serverShutdown,
                 instance.playerRegistry,
+                instance.partyManager,
                 instance.cloudConfig.getHttpApiPort());
             instance.httpServer.start();
         }
-        // Register CLI commands.
         instance.commandRegistry = new CommandRegistry();
         instance.commandSystem = new CommandSystem(instance.keyScanner, instance.commandRegistry);
         instance.commandRegistry.register(new HelpCommand(instance.commandRegistry));
@@ -122,7 +124,6 @@ public class Cloud
         instance.commandRegistry.register(new StopServerCommand(instance.serverShutdown));
         ConsoleUi.logo();
         ConsoleUi.success("Cloud core initialized.");
-        // Periodic health and scaling checks.
         instance.autoRenewService.start();
         instance.metricsRecorder.start();
         instance.templateSqlSyncService.start();
