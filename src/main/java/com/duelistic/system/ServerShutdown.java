@@ -25,7 +25,7 @@ public class ServerShutdown {
      *
      * @return number of servers that were present.
      */
-    public int stopAll() throws IOException {
+    public int stopAll() throws IOException, InterruptedException {
         // Stop all tmp servers and clean the tmp directory.
         List<String> servers = directories.listTmpServers();
         if (servers.isEmpty()) {
@@ -34,6 +34,7 @@ public class ServerShutdown {
         for (String server : servers) {
             processManager.stopServer(server);
         }
+        Thread.sleep(1000 * 5);
         directories.deleteTmp();
         return servers.size();
     }
@@ -43,11 +44,12 @@ public class ServerShutdown {
      * @param serverName
      * @return if stop was successful
      */
-    public boolean stop(String serverName) throws IOException {
+    public boolean stop(String serverName) throws IOException, InterruptedException {
         List<String> servers = directories.listTmpServers();
         if (!servers.contains(serverName))
             return false;
         processManager.stopServer(serverName);
+        Thread.sleep(1000 * 5);
         directories.deleteTmpServer(serverName);
         return true;
     }
