@@ -2,6 +2,10 @@ package com.duelistic.system;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.duelistic.ui.ConsoleUi;
 
@@ -11,7 +15,6 @@ import com.duelistic.ui.ConsoleUi;
 public class ServerShutdown {
     private final CloudDirectories directories;
     private final ServerProcessManager processManager;
-
     /**
      * Creates a shutdown helper for managed servers.
      */
@@ -25,17 +28,29 @@ public class ServerShutdown {
      *
      * @return number of servers that were present.
      */
-    public int stopAll() throws IOException, InterruptedException {
-        // Stop all tmp servers and clean the tmp directory.
+    public int stopAll() throws IOException {
         List<String> servers = directories.listTmpServers();
         if (servers.isEmpty()) {
             ConsoleUi.info("No servers to stop.");
+            return 0;
         }
+
         for (String server : servers) {
             processManager.stopServer(server);
         }
-        Thread.sleep(1000 * 5);
-        directories.deleteTmp();
+
+        ScheduledExecutorService scheduler =
+                Executors.newSingleThreadScheduledExecutor();
+
+        scheduler.schedule(() -> {
+            try {
+                directories.deleteTmp();
+            } catch (IOException e) {
+                ConsoleUi.error("Failed to delete tmp directory: " + e.getMessage());
+            }
+        }, 5, TimeUnit.SECONDS);
+
+        scheduler.shutdown();
         return servers.size();
     }
 
@@ -44,13 +59,23 @@ public class ServerShutdown {
      * @param serverName
      * @return if stop was successful
      */
-    public boolean stop(String serverName) throws IOException, InterruptedException {
+    public boolean stop(String serverName) throws IOException {
         List<String> servers = directories.listTmpServers();
         if (!servers.contains(serverName))
             return false;
         processManager.stopServer(serverName);
-        Thread.sleep(1000 * 5);
-        directories.deleteTmpServer(serverName);
+        ScheduledExecutorService scheduler =
+                Executors.newSingleThreadScheduledExecutor();
+
+
+        scheduler.schedule(() -> {
+            try {
+                directories.deleteTmpServer(serverName);
+            } catch (IOException e) {
+                ConsoleUi.error("Failed to delete tmp directory: " + e.getMessage());
+            }
+        }, 5, TimeUnit.SECONDS);
         return true;
     }
+
 }

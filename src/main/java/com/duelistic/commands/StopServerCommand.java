@@ -27,8 +27,6 @@ public class StopServerCommand implements Command{
             }
         } catch (IOException e) {
             ConsoleUi.error("Failed to stop server: " + e.getMessage());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 

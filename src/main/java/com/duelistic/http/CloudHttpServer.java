@@ -324,8 +324,6 @@ public class CloudHttpServer {
             }
         } catch (IOException e) {
             sendJson(exchange, 500, "{\"error\":\"failed_to_stop_server\"}");
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 

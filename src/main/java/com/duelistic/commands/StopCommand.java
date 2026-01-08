@@ -68,8 +68,6 @@ public class StopCommand implements Command {
             ConsoleUi.success("Stopped " + stopped + " servers.");
         } catch (IOException e) {
             ConsoleUi.error("Failed to delete tmp servers: " + e.getMessage());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
         autoRenewService.stop();
         metricsRecorder.stop();
@@ -77,6 +75,7 @@ public class StopCommand implements Command {
         dashboardMetricsRecorder.stop();
         banCleanupService.stop();
         serverSqlSyncService.stop();
+
         if (httpServer != null) {
             httpServer.stop();
         }
