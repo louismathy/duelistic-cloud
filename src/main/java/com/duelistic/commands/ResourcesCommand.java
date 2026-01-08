@@ -50,4 +50,9 @@ public class ResourcesCommand implements Command{
                 + " MiB (" + free
                 + " MiB free)";
     }
+
+    @Override
+    public String getUsage() {
+        return "resources";
+    }
 }

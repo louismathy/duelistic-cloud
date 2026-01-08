@@ -19,15 +19,19 @@ public class StopServerCommand implements Command{
             printUsage();
             return;
         }
-        try {
-            if (shutdown.stop(args[0])) {
-                ConsoleUi.info("Stopped " + args[0]);
-            } else {
-                ConsoleUi.error("Failed to stop " + args[0]);
-            }
-        } catch (IOException e) {
-            ConsoleUi.error("Failed to stop server: " + e.getMessage());
-        }
+        shutdown.stop(args[0])
+                .thenAccept(stopped -> {
+                    if (stopped) {
+                        ConsoleUi.info("Stopped " + args[0]);
+                    } else {
+                        ConsoleUi.error("Failed to stop " + args[0]);
+                    }
+                })
+                .exceptionally(ex -> {
+                    ConsoleUi.error("Failed to stop " + args[0] + ": " + ex.getMessage());
+                    return null;
+                });
+
     }
 
     @Override
@@ -40,6 +44,11 @@ public class StopServerCommand implements Command{
      */
     private void printUsage() {
         ConsoleUi.section("Usage");
-        ConsoleUi.item("stopserver <server>");
+        ConsoleUi.item(getUsage());
+    }
+
+    @Override
+    public String getUsage() {
+        return "stopserver <server>";
     }
 }

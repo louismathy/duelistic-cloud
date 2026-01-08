@@ -8,6 +8,7 @@ public interface Command {
      * Returns the command name used for lookup.
      */
     String getName();
+    String getUsage();
 
     /**
      * Executes the command with the provided arguments.

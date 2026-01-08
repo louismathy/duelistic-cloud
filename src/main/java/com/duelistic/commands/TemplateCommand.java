@@ -140,4 +140,8 @@ public class TemplateCommand implements Command {
         ConsoleUi.item("template remove <name>");
         ConsoleUi.item("template list");
     }
+
+    public String getUsage() {
+        return "template [add / remove] name | template list";
+    }
 }

@@ -30,6 +30,11 @@ public class UnbanCommand implements Command {
         return "unban";
     }
 
+    @Override
+    public String getUsage() {
+        return "unban <username>";
+    }
+
     /**
      * Validates input and removes an existing ban.
      */
@@ -132,6 +137,6 @@ public class UnbanCommand implements Command {
      */
     private void printUsage() {
         ConsoleUi.section("Usage");
-        ConsoleUi.item("unban <username>");
+        ConsoleUi.item(getUsage());
     }
 }

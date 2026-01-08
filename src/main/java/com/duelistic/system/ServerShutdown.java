@@ -2,10 +2,7 @@ package com.duelistic.system;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import com.duelistic.ui.ConsoleUi;
 
@@ -28,54 +25,81 @@ public class ServerShutdown {
      *
      * @return number of servers that were present.
      */
-    public int stopAll() throws IOException {
-        List<String> servers = directories.listTmpServers();
-        if (servers.isEmpty()) {
-            ConsoleUi.info("No servers to stop.");
-            return 0;
-        }
-
-        for (String server : servers) {
-            processManager.stopServer(server);
-        }
-
-        ScheduledExecutorService scheduler =
-                Executors.newSingleThreadScheduledExecutor();
-
-        scheduler.schedule(() -> {
+    public CompletableFuture<Integer> stopAll() {
+        return CompletableFuture.supplyAsync(() -> {
             try {
-                directories.deleteTmp();
-            } catch (IOException e) {
-                ConsoleUi.error("Failed to delete tmp directory: " + e.getMessage());
-            }
-        }, 5, TimeUnit.SECONDS);
+                List<String> servers = directories.listTmpServers();
+                if (servers.isEmpty()) {
+                    ConsoleUi.info("No servers to stop.");
+                    return 0;
+                }
 
-        scheduler.shutdown();
-        return servers.size();
+                for (String server : servers) {
+                    processManager.stopServer(server);
+                }
+
+                ScheduledExecutorService scheduler =
+                        Executors.newSingleThreadScheduledExecutor();
+
+                CompletableFuture<Integer> result = new CompletableFuture<>();
+
+                scheduler.schedule(() -> {
+                    try {
+                        directories.deleteTmp();
+                        result.complete(servers.size());
+                    } catch (IOException e) {
+                        ConsoleUi.error("Failed to delete tmp directory: " + e.getMessage());
+                        result.completeExceptionally(e);
+                    } finally {
+                        scheduler.shutdown();
+                    }
+                }, 5, TimeUnit.SECONDS);
+
+                return result.join();
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        });
     }
+
 
     /**
      * Stops single tmp server
      * @param serverName
      * @return if stop was successful
      */
-    public boolean stop(String serverName) throws IOException {
-        List<String> servers = directories.listTmpServers();
-        if (!servers.contains(serverName))
-            return false;
-        processManager.stopServer(serverName);
-        ScheduledExecutorService scheduler =
-                Executors.newSingleThreadScheduledExecutor();
-
-
-        scheduler.schedule(() -> {
+    public CompletableFuture<Boolean> stop(String serverName) {
+        return CompletableFuture.supplyAsync(() -> {
             try {
-                directories.deleteTmpServer(serverName);
+                List<String> servers = directories.listTmpServers();
+                if (!servers.contains(serverName)) {
+                    return false;
+                }
+
+                processManager.stopServer(serverName);
+
+                ScheduledExecutorService scheduler =
+                        Executors.newSingleThreadScheduledExecutor();
+
+                CompletableFuture<Boolean> result = new CompletableFuture<>();
+
+                scheduler.schedule(() -> {
+                    try {
+                        directories.deleteTmpServer(serverName);
+                        result.complete(true);
+                    } catch (IOException e) {
+                        ConsoleUi.error("Failed to delete tmp directory: " + e.getMessage());
+                        result.completeExceptionally(e);
+                    } finally {
+                        scheduler.shutdown();
+                    }
+                }, 5, TimeUnit.SECONDS);
+
+                return result.join();
             } catch (IOException e) {
-                ConsoleUi.error("Failed to delete tmp directory: " + e.getMessage());
+                throw new CompletionException(e);
             }
-        }, 5, TimeUnit.SECONDS);
-        return true;
+        });
     }
 
 }

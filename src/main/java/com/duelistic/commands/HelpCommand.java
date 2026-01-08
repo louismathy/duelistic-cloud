@@ -23,6 +23,11 @@ public class HelpCommand implements Command {
         return "help";
     }
 
+    @Override
+    public String getUsage() {
+        return "help";
+    }
+
     /**
      * Prints command names to the console.
      */
@@ -30,7 +35,7 @@ public class HelpCommand implements Command {
     public void execute(String[] args) {
         ConsoleUi.section("Available commands");
         for (Command command : registry.list()) {
-            ConsoleUi.item(command.getName());
+            ConsoleUi.item(command.getName() + " (" + command.getUsage() + ")");
         }
     }
 }

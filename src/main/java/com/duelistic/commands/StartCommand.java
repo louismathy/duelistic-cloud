@@ -26,6 +26,8 @@ public class StartCommand implements Command {
         return "start";
     }
 
+
+
     /**
      * Starts all configured template servers.
      */
@@ -38,5 +40,10 @@ public class StartCommand implements Command {
         } catch (IOException e) {
             ConsoleUi.error("Start failed: " + e.getMessage());
         }
+    }
+
+    @Override
+    public String getUsage() {
+        return "start";
     }
 }

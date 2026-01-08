@@ -36,6 +36,11 @@ public class StartServerCommand implements Command{
      */
     private void printUsage() {
         ConsoleUi.section("Usage");
-        ConsoleUi.item("startserver <template>");
+        ConsoleUi.item(getUsage());
+    }
+
+    @Override
+    public String getUsage() {
+        return "startserver <template>";
     }
 }

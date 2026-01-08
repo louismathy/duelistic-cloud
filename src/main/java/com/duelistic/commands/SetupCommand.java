@@ -30,6 +30,8 @@ public class SetupCommand implements Command {
         return "setup";
     }
 
+
+
     /**
      * Runs the interactive setup flow.
      */
@@ -48,5 +50,10 @@ public class SetupCommand implements Command {
         } catch (IOException e) {
             ConsoleUi.error("Setup failed: " + e.getMessage());
         }
+    }
+
+    @Override
+    public String getUsage() {
+        return "setup";
     }
 }

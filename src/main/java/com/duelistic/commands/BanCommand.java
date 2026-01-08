@@ -170,6 +170,11 @@ public class BanCommand implements Command {
      */
     private void printUsage() {
         ConsoleUi.section("Usage");
-        ConsoleUi.item("ban <username> <length_minutes> <reason>");
+        ConsoleUi.item(getUsage());
+    }
+
+    @Override
+    public String getUsage() {
+        return "ban <username> <length_minutes> <reason>";
     }
 }

@@ -310,22 +310,38 @@ public class CloudHttpServer {
             sendJson(exchange, 405, "{\"error\":\"method_not_allowed\"}");
             return;
         }
-        String name = path.replaceFirst("^/api/servers/?", "").replaceFirst("/stop$", "").trim();
+
+        String name = path.replaceFirst("^/api/servers/?", "")
+                .replaceFirst("/stop$", "")
+                .trim();
+
         if (name.isEmpty()) {
             sendJson(exchange, 404, "{\"error\":\"not_found\"}");
             return;
         }
-        try {
-            boolean stopped = serverShutdown.stop(name);
-            if (stopped) {
-                sendJson(exchange, 200, "{\"status\":\"stopped\"}");
-            } else {
-                sendJson(exchange, 404, "{\"error\":\"not_found\"}");
-            }
-        } catch (IOException e) {
-            sendJson(exchange, 500, "{\"error\":\"failed_to_stop_server\"}");
-        }
+
+        serverShutdown.stop(name)
+                .thenAccept(stopped -> {
+                    try {
+                        if (stopped) {
+                            sendJson(exchange, 200, "{\"status\":\"stopped\"}");
+                        } else {
+                            sendJson(exchange, 404, "{\"error\":\"not_found\"}");
+                        }
+                    } catch (IOException e) {
+                        ConsoleUi.error("Failed to write HTTP response: " + e.getMessage());
+                    }
+                })
+                .exceptionally(ex -> {
+                    try {
+                        sendJson(exchange, 500, "{\"error\":\"failed_to_stop_server\"}");
+                    } catch (IOException e) {
+                        ConsoleUi.error("Failed to write HTTP error response: " + e.getMessage());
+                    }
+                    return null;
+                });
     }
+
 
     private static Integer readQueryInt(String query, String key) {
         String value = readQueryValue(query, key);

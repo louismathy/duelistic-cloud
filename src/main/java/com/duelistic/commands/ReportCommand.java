@@ -30,6 +30,7 @@ public class ReportCommand implements Command {
         return "report";
     }
 
+
     /**
      * Validates input and inserts a report row.
      */
@@ -161,6 +162,11 @@ public class ReportCommand implements Command {
      */
     private void printUsage() {
         ConsoleUi.section("Usage");
-        ConsoleUi.item("report <reported_player> <reporter_player> <reason> <location>");
+        ConsoleUi.item(getUsage());
+    }
+
+    @Override
+    public String getUsage() {
+        return "report <reported_player> <reporter_player> <reason> <location>";
     }
 }

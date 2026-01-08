@@ -63,12 +63,14 @@ public class StopCommand implements Command {
     @Override
     public void execute(String[] args) {
         ConsoleUi.info("Stopping Duelistic Cloud...");
+
         try {
-            int stopped = shutdown.stopAll();
+            int stopped = shutdown.stopAll().get();
             ConsoleUi.success("Stopped " + stopped + " servers.");
-        } catch (IOException e) {
+        } catch (Exception e) {
             ConsoleUi.error("Failed to delete tmp servers: " + e.getMessage());
         }
+
         autoRenewService.stop();
         metricsRecorder.stop();
         templateSqlSyncService.stop();
@@ -79,6 +81,13 @@ public class StopCommand implements Command {
         if (httpServer != null) {
             httpServer.stop();
         }
+
         commandSystem.stop();
+    }
+
+
+    @Override
+    public String getUsage() {
+        return "stop";
     }
 }

@@ -28,6 +28,8 @@ public class ServerListCommand implements Command {
         return "servers";
     }
 
+
+
     /**
      * Displays server status information to the console.
      */
@@ -51,5 +53,10 @@ public class ServerListCommand implements Command {
         } catch (IOException e) {
             ConsoleUi.error("Failed to list servers: " + e.getMessage());
         }
+    }
+
+    @Override
+    public String getUsage() {
+        return "servers";
     }
 }
